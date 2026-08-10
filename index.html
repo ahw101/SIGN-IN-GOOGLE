@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Google Auth</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Firebase Google Sign-In</h1>
+
+    <!-- Log In UI -->
+    <div id="logged-out-ui">
+        <button id="login-btn">Sign in with Google</button>
+    </div>
+
+    <!-- User Profile UI (Hidden by default) -->
+    <div id="logged-in-ui" class="hidden">
+        <h3 id="user-name">Welcome, User</h3>
+        <p id="user-email">user@example.com</p>
+        <button id="logout-btn">Sign Out</button>
+    </div>
+
+    <!-- Firebase App & Auth SDK Modules -->
+    <script type="module">
+        // Import the necessary functions from the Firebase CDN
+        import { initializeApp } from "https://gstatic.com";
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signOut, 
+            onAuthStateChanged 
+        } from "https://gstatic.com";
+
+        // TODO: Replace this object with your actual Firebase project configuration 
+        // You can find this in your Firebase Project Settings -> Your Apps
+        const firebaseConfig = {
+            apiKey: "AIzaSyC99aNYLeO23WlsyFJbOTrwdgZ0ZOsiGX0",
+            authDomain: "mathtime-a3c36.firebaseapp.com",
+            projectId: "mathtime-a3c36",
+            storageBucket: "mathtime-a3c36.firebasestorage.app",
+            messagingSenderId: "686909463941",
+            appId: "1:686909463941:web:f75fea5c19e9a27b8bb8ec"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // DOM Elements
+        const loginBtn = document.getElementById("login-btn");
+        const logoutBtn = document.getElementById("logout-btn");
+        const loggedOutUi = document.getElementById("logged-out-ui");
+        const loggedInUi = document.getElementById("logged-in-ui");
+        const userName = document.getElementById("user-name");
+        const userEmail = document.getElementById("user-email");
+
+        // 1. Sign In Function
+        loginBtn.addEventListener("click", () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // Google Access Token (optional, used to access Google APIs)
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken;
+                    // The signed-in user info
+                    const user = result.user;
+                    console.log("Logged in user:", user);
+                })
+                .catch((error) => {
+                    console.error("Authentication Error:", error.message);
+                });
+        });
+
+        // 2. Sign Out Function
+        logoutBtn.addEventListener("click", () => {
+            signOut(auth)
+                .then(() => {
+                    console.log("User signed out.");
+                })
+                .catch((error) => {
+                    console.error("Sign Out Error:", error);
+                });
+        });
+
+        // 3. Monitor Authentication State
+        // This runs automatically whenever the user logs in or out
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                userName.textContent = `Welcome, ${user.displayName}`;
+                userEmail.textContent = user.email;
+                
+                loggedOutUi.classList.add("hidden");
+                loggedInUi.classList.remove("hidden");
+            } else {
+                // User is signed out
+                loggedOutUi.classList.remove("hidden");
+                loggedInUi.classList.add("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
